@@ -19,8 +19,6 @@ steering = None
 flag = False
 
 def grayscale(img):
-    # return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    # Or use BGR2GRAY if you read an image with cv2.imread()
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 def gaussian_blur(img, kernel_size):
@@ -96,9 +94,6 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
             for x1,y1,x2,y2 in line:
                 #PolyFit function of Numpy gives you slope and intercept
                 slope, intercept = np.polyfit((x1,x2), (y1,y2), 1)
-                #print(slope, intercept)
-                
-                                    # TEST: LIMIT SLOPE
                 lSlope = (y2 - y1) / (x2 - x1)
 
                 if min_slope <= abs(lSlope) <= max_slope:
@@ -212,12 +207,9 @@ def finalMask(img):
     boxRight1 = (1500, 700)
     boxRight2 = (1500, 900)
     # White Midline
-    #mid = ((1140, 1100 - 70), (1140, 1100 + 70))
     mid = ((800, 800 - 50), (800, 800 + 50))
     # Blue Midlines
-    #midpoint_markerR = ((1770, 1100 - 70), (1770, 1100 + 70))
     midpoint_markerR = ((1240, 800 - 50), (1240, 800 + 50))
-    #midpoint_markerL = ((510, 1100 - 70), (510, 1100 + 70))
     midpoint_markerL = ((360, 800 - 50), (360, 800 + 50))
     
     try:
@@ -315,8 +307,7 @@ def process_image(image):
     yMax = image.shape[0]
     yLen = 360    
 
-    #vertices = np.array([[(0, 1365), (2274, 1365), (2000, 600), (500, 600)]], dtype=np.int32)
-    vertices = np.array([[(0, 1080), (1620, 1080), (1300, 500), (320, 500)]], dtype=np.int32)
+    vertices = np.array([[(0, 1080), (1620, 1080), (1620, 500), (0, 500)]], dtype=np.int32)
 
     masked_image = region_of_interest(cannyEdge_image, vertices)
 
