@@ -8,6 +8,7 @@ dependencies:
   - opencv
   - numpy
   - matplotlib
+  - pyserial
   - pytorch::pytorch=2.1
   - conda-forge::pytest
   - conda-forge::pytorch-lightning=2.0
