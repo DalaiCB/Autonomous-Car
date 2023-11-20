@@ -1,0 +1,15 @@
+name: DalaiCB
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.11
+  - opencv
+  - numpy
+  - matplotlib
+  - pytorch::pytorch=2.1
+  - conda-forge::pytest
+  - conda-forge::pytorch-lightning=2.0
+  - pip
+  - git
