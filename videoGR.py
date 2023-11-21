@@ -86,8 +86,9 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
     rightLaneSlopeArray = []
     rightLaneInterceptArray = []
     
+    img_center = 940
     min_slope = 0.5
-    max_slope = 2.0
+    max_slope = 100
 
     try:
         for line in lines:
@@ -95,16 +96,17 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
                 #PolyFit function of Numpy gives you slope and intercept
                 slope, intercept = np.polyfit((x1,x2), (y1,y2), 1)
                 lSlope = (y2 - y1) / (x2 - x1)
+                line_midpoint_x = (x1 + x2) // 2
 
                 if min_slope <= abs(lSlope) <= max_slope:
                     intercept = y1 - lSlope * x1
 
-                    if (slope > 0):
+                    if (line_midpoint_x < img_center):
                         leftLaneSlopeArray += [slope]
                         leftLaneInterceptArray += [intercept]
                     else:
                         rightLaneSlopeArray += [slope]
-                        rightLaneInterceptArray += [intercept] 
+                        rightLaneInterceptArray += [intercept]
     except:
         print("\nError: draw_lines() Exception 1")
         pass
@@ -121,18 +123,18 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
                     leftLaneInterceptArrayAverage,
                     rightLaneSlopeArrayAverage,
                     rightLaneInterceptArrayAverage,
-                    800)
+                    900)
     except:
         print("\nError: draw_lines() Exception 2")
         pass
     
-    yMin = 500
-    yMax = 1080
+    yMin = 700
+    yMax = 1000
 
     try:
         x1Left = int(np.nan_to_num(float((yMin-leftLaneInterceptArrayAverage)/leftLaneSlopeArrayAverage)))
         x2Left = int(np.nan_to_num(float((yMax-leftLaneInterceptArrayAverage)/leftLaneSlopeArrayAverage)))
-        cv2.line(img, (x1Left, yMin), (x2Left, yMax), color, thickness)
+        cv2.line(img, (x1Left, yMin), (x2Left, yMax), color, 20)
     except:
         print("\nError: draw_lines() Exception 3")
         pass
@@ -140,7 +142,7 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
     try:
         x1Right = int(np.nan_to_num(float((yMin-rightLaneInterceptArrayAverage)/rightLaneSlopeArrayAverage)))
         x2Right = int(np.nan_to_num(float((yMax-rightLaneInterceptArrayAverage)/rightLaneSlopeArrayAverage)))
-        cv2.line(img, (x1Right, yMin), (x2Right, yMax), color, thickness)
+        cv2.line(img, (x1Right, yMin), (x2Right, yMax), color, 20)
     except:
         print("\nError: draw_lines() Exception 4")
         pass
@@ -160,20 +162,34 @@ def carControl(pixDeviation):
         control = "Steer: Right"
         # Steer Right
         if steering != "R":
+            if steering == "L":
+                ser.write(b'r')
+                ser.write(b'r')
+                ser.write(b'r')
+                ser.write(b'r')
+            else:
+                ser.write(b'r')
+                ser.write(b'r')
+            
             steering = "R"
             print("\nTurning Right")
             print("Steering Position: " + steering)
-            ser.write(b'r')
-            ser.write(b'r')
+            
     elif pixDeviation < -30:
         control = "Steer: Left"
         # Steer Left
         if steering != "L":
+            if steering == "R":
+                ser.write(b'l')
+                ser.write(b'l')
+                ser.write(b'l')
+                ser.write(b'l')
+            else:
+                ser.write(b'l')
+                ser.write(b'l')
             steering = "L"
             print("\nTurning Left")
             print("Steering Position: " + steering)
-            ser.write(b'l')
-            ser.write(b'l')
     else:
         control = "Steer: Straight"
         if steering != "C":
@@ -196,25 +212,25 @@ def finalMask(img):
     
         # Lane Centering Guide Lines
     # Left Blue
-    left1 = (160, 800)
-    left2 = (560, 800)
+    left1 = (440 - 240, 900)
+    left2 = (440 + 240, 900)
     # Right Blue
-    right1 = (1040, 800)
-    right2 = (1440, 800)
+    right1 = (1370 - 240, 900)
+    right2 = (1370 + 240, 900)
     # Red Box
-    boxLeft1 = (100, 700)
-    boxLeft2 = (100, 900)
-    boxRight1 = (1500, 700)
-    boxRight2 = (1500, 900)
+    boxLeft1 = ((440 - 240) - 100, 800)
+    boxLeft2 = ((440 - 240) - 100, 1000)
+    boxRight1 = ((1370 + 240) + 100, 800)
+    boxRight2 = ((1370 + 240) + 100, 1000)
     # White Midline
-    mid = ((800, 800 - 50), (800, 800 + 50))
+    mid = ((905, 900 - 50), (905, 900 + 50))
     # Blue Midlines
-    midpoint_markerR = ((1240, 800 - 50), (1240, 800 + 50))
-    midpoint_markerL = ((360, 800 - 50), (360, 800 + 50))
+    midpoint_markerR = ((1370, 900 - 50), (1370, 900 + 50))
+    midpoint_markerL = ((440, 900 - 50), (440, 900 + 50))
     
     try:
-        laneMarkerL = ((x1, 800 - 30), (x1, 800 + 30))
-        laneMarkerR = ((x2, 800 - 30), (x2, 800 + 30))
+        laneMarkerL = ((x1, 9900 - 30), (x1, 9900 + 30))
+        laneMarkerR = ((x2, 9900 - 30), (x2, 9900 + 30))
     
         # Draw the red line
         cv2.line(image, left1, left2, (0, 0, 255), 3)
@@ -241,12 +257,12 @@ def finalMask(img):
                 midR = "Right Midpoint = 1200"
 
                 leftX = f"Left X = {x2:.2f}"
-                left = int(x2 - 360)
+                left = int(x2 - 440)
                 lDev = f"Left Deviation = {left:.2f}"
                 
                 
                 rightX = f"Right X = {x1:.2f}"
-                right = int(x1 - 1240)
+                right = int(x1 - 1370)
                 rDev = f"Right Deviation = {right:.2f}"
 
                 average = (left + right) / 2
@@ -257,8 +273,8 @@ def finalMask(img):
 
                     # Draw Steering Line
                 average = int(average)
-                mid = ((800 + average, 800 - 30), (800 + average, 800 + 30))
-                cv2.line(img, (800 + average, 800), (800, 800), (0, 255, 0), 2)
+                mid = ((905 + average, 900900 - 30), (905 + average, 900900 + 30))
+                cv2.line(img, (905 + average, 900900), (905, 900900), (0, 255, 0), 2)
                 cv2.line(img, mid[0], mid[1], (0, 255, 0), 2)
 
                     # Define the font and other text properties
@@ -268,16 +284,16 @@ def finalMask(img):
                 font_thickness = 2
 
                 cv2.putText(img, midL, (100, 200), font, font_scale, (0, 0, 255), font_thickness)
-                cv2.putText(img, midR, (1200, 200), font, font_scale, (0, 0, 255), font_thickness)
+                cv2.putText(img, midR, (1400, 200), font, font_scale, (0, 0, 255), font_thickness)
 
                 cv2.putText(img, leftX, (100, 250), font, font_scale, (0, 255, 0), font_thickness)
-                cv2.putText(img, rightX, (1200, 250), font, font_scale, (0, 255, 0), font_thickness)
+                cv2.putText(img, rightX, (1400, 250), font, font_scale, (0, 255, 0), font_thickness)
 
                 cv2.putText(img, lDev, (100, 300), font, font_scale, (0, 0, 255), font_thickness)
-                cv2.putText(img, rDev, (1200, 300), font, font_scale, (0, 0, 255), font_thickness)
+                cv2.putText(img, rDev, (1400, 300), font, font_scale, (0, 0, 255), font_thickness)
 
-                cv2.putText(img, avgDev, (650, 600), font, font_scale, font_color, font_thickness)
-                cv2.putText(img, steeringInput, (650, 650), font, font_scale, font_color, font_thickness)
+                cv2.putText(img, avgDev, (750, 600), font, font_scale, font_color, font_thickness)
+                cv2.putText(img, steeringInput, (750, 650), font, font_scale, font_color, font_thickness)
             except Exception as ex:
                 print("\nfinalMask() Exception 3:\n\t", ex)
                 pass
@@ -301,13 +317,13 @@ def process_image(image):
 
     cannyEdge_image = canny(blurred_gray_image, low_threshold, high_threshold)
 
-    xMin = 0
-    yMin = 0
-    xMax = image.shape[1]
-    yMax = image.shape[0]
-    yLen = 360    
+    # xMin = 0
+    # yMin = 0
+    # xMax = image.shape[1]
+    # yMax = image.shape[0]
+    # yLen = 500    
 
-    vertices = np.array([[(0, 1080), (1620, 1080), (1620, 500), (0, 500)]], dtype=np.int32)
+    vertices = np.array([[(0, 1080), (1920, 1080), (1720, 700), (200, 700)]], dtype=np.int32)
 
     masked_image = region_of_interest(cannyEdge_image, vertices)
 
@@ -342,11 +358,6 @@ ser.write(b'f')
 # plt.imshow(final_image)
 # plt.show()
 
-# ser.write(b'F')
-
-# Steering 
-# steering = "C"
-
 # '''
 while (cap.isOpened()):
     _, frame = cap.read()
@@ -362,7 +373,7 @@ while (cap.isOpened()):
         frameRs = final_image
         
     cv2.imshow('result', frameRS)
-    if cv2.waitKey(5) & 0xFF == ord('q'):
+    if cv2.waitKey(10) & 0xFF == ord('q'):
            ser.write(b's')
            ser.write(b'c')
            break
@@ -374,6 +385,8 @@ while (cap.isOpened()):
 
 cap.release()
 cv2.destroyAllWindows()
+
+print("\n\n\t\t", steering)
 
 # ser.write(b'S')
 # ser.write(b'C')
