@@ -1,4 +1,4 @@
-name: DalaiCB
+name: AutoCarEnv
 channels:
   - conda-forge
   - pytorch

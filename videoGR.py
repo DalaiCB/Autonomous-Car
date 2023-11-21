@@ -9,11 +9,15 @@ import time
 
 #MAC: /dev/cu.usbserial-10
 #LINUX: /dev/ttyACM2
-arduino_port = '/dev/cu.usbserial-10' 
-baud_rate = 9600
+try:
+    arduino_port = '/dev/cu.usbserial-110' 
+    baud_rate = 9600
 
-ser = serial.Serial(arduino_port, baud_rate, timeout=1)
-time.sleep(2) #Wait for Serial Port to Open
+    ser = serial.Serial(arduino_port, baud_rate, timeout=1)
+    time.sleep(2) #Wait for Serial Port to Open
+except Exception as ex:
+    print("\n\tArduino Port Error: ", ex)
+    pass
 
 steering = None
 flag = False
@@ -187,6 +191,7 @@ def carControl(pixDeviation):
             else:
                 ser.write(b'l')
                 ser.write(b'l')
+                
             steering = "L"
             print("\nTurning Left")
             print("Steering Position: " + steering)
@@ -212,25 +217,25 @@ def finalMask(img):
     
         # Lane Centering Guide Lines
     # Left Blue
-    left1 = (440 - 240, 900)
-    left2 = (440 + 240, 900)
+    left1 = (515 - 240, 900)
+    left2 = (515 + 240, 900)
     # Right Blue
-    right1 = (1370 - 240, 900)
-    right2 = (1370 + 240, 900)
+    right1 = (1365 - 240, 900)
+    right2 = (1365 + 240, 900)
     # Red Box
-    boxLeft1 = ((440 - 240) - 100, 800)
-    boxLeft2 = ((440 - 240) - 100, 1000)
-    boxRight1 = ((1370 + 240) + 100, 800)
-    boxRight2 = ((1370 + 240) + 100, 1000)
+    boxLeft1 = ((515 - 240) - 100, 900 - 100)
+    boxLeft2 = ((515 - 240) - 100, 900 + 100)
+    boxRight1 = ((1365 + 240) + 100, 900 - 100)
+    boxRight2 = ((1365 + 240) + 100, 900 + 100)
     # White Midline
     mid = ((905, 900 - 50), (905, 900 + 50))
     # Blue Midlines
-    midpoint_markerR = ((1370, 900 - 50), (1370, 900 + 50))
-    midpoint_markerL = ((440, 900 - 50), (440, 900 + 50))
+    midpoint_markerR = ((1365, 900 - 50), (1365, 900 + 50))
+    midpoint_markerL = ((515, 900 - 50), (515, 900 + 50))
     
     try:
-        laneMarkerL = ((x1, 9900 - 30), (x1, 9900 + 30))
-        laneMarkerR = ((x2, 9900 - 30), (x2, 9900 + 30))
+        laneMarkerL = ((x1, 900 - 30), (x1, 900 + 30))
+        laneMarkerR = ((x2, 900 - 30), (x2, 900 + 30))
     
         # Draw the red line
         cv2.line(image, left1, left2, (0, 0, 255), 3)
@@ -253,16 +258,16 @@ def finalMask(img):
 
             try:
                 # Add the text to the image
-                midL = "Left Midpoint = 400"
-                midR = "Right Midpoint = 1200"
+                midL = "Left Midpoint = 515"
+                midR = "Right Midpoint = 1365"
 
                 leftX = f"Left X = {x2:.2f}"
-                left = int(x2 - 440)
+                left = int(x1 - 515)
                 lDev = f"Left Deviation = {left:.2f}"
                 
                 
                 rightX = f"Right X = {x1:.2f}"
-                right = int(x1 - 1370)
+                right = int(x2 - 1365)
                 rDev = f"Right Deviation = {right:.2f}"
 
                 average = (left + right) / 2
@@ -273,8 +278,8 @@ def finalMask(img):
 
                     # Draw Steering Line
                 average = int(average)
-                mid = ((905 + average, 900900 - 30), (905 + average, 900900 + 30))
-                cv2.line(img, (905 + average, 900900), (905, 900900), (0, 255, 0), 2)
+                mid = ((905 + average, 900 - 30), (905 + average, 900 + 30))
+                cv2.line(img, (905 + average, 900), (905, 900), (0, 255, 0), 2)
                 cv2.line(img, mid[0], mid[1], (0, 255, 0), 2)
 
                     # Define the font and other text properties
@@ -323,7 +328,7 @@ def process_image(image):
     # yMax = image.shape[0]
     # yLen = 500    
 
-    vertices = np.array([[(0, 1080), (1920, 1080), (1720, 700), (200, 700)]], dtype=np.int32)
+    vertices = np.array([[(300, 1000), (1600, 1000), (1480, 700), (515, 700)]], dtype=np.int32)
 
     masked_image = region_of_interest(cannyEdge_image, vertices)
 
