@@ -121,6 +121,14 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
     rightLaneSlopeArrayAverage = np.mean(rightLaneSlopeArray)
     rightLaneInterceptArrayAverage = np.mean(rightLaneInterceptArray)
 
+                                        # SINGLE LANE FUNCTIONALITY TEST
+    if np.isnan(leftLaneInterceptArrayAverage) or np.isnan(leftLaneSlopeArrayAverage):
+        leftLaneSlopeArrayAverage = 0
+        leftLaneInterceptArrayAverage = 0
+    if np.isnan(rightLaneSlopeArrayAverage) or np.isnan(rightLaneInterceptArrayAverage):
+        rightLaneSlopeArrayAverage = 0
+        rightLaneInterceptArrayAverage = 0
+
     # Calculate Car Position
     try:
         carPosition(leftLaneSlopeArrayAverage,
@@ -353,15 +361,8 @@ def process_image(image):
 
     return complete_img
 
-# cap = cv2.VideoCapture("test.mp4")
 cap = cv2.VideoCapture(0)
 ser.write(b'f')
-# _, frame = cap.read()
-
-# final_image = process_image(frame)
-
-# plt.imshow(final_image)
-# plt.show()
 
 # '''
 while (cap.isOpened()):
@@ -380,20 +381,18 @@ while (cap.isOpened()):
     cv2.imshow('result', frameRS)
     if cv2.waitKey(10) & 0xFF == ord('q'):
            ser.write(b's')
-           ser.write(b'c')
+           ser.close()
            break
-    
-    # plt.imshow(final_image)
-    # plt.show(block=False)
-    # plt.pause(0.5)
-    # plt.close()
+
+if steering == "L":
+    ser.write(b'r')
+    ser.write(b'r')
+elif steering == "R":
+    ser.write(b'l')
+    ser.write(b'l')
+
+ser.write(b'c')
 
 cap.release()
 cv2.destroyAllWindows()
-
-print("\n\n\t\t", steering)
-
-# ser.write(b'S')
-# ser.write(b'C')
-# ser.close()
 #'''
