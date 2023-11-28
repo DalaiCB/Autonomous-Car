@@ -105,7 +105,7 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
                 if min_slope <= abs(lSlope) <= max_slope:
                     intercept = y1 - lSlope * x1
 
-                    if (line_midpoint_x < img_center):
+                    if (line_midpoint_x < img_center - 100):
                         leftLaneSlopeArray += [slope]
                         leftLaneInterceptArray += [intercept]
                     else:
@@ -140,7 +140,7 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
         print("\nError: draw_lines() Exception 2")
         pass
     
-    yMin = 700
+    yMin = 800
     yMax = 1000
 
     try:
@@ -174,14 +174,14 @@ def carControl(pixDeviation):
         control = "Steer: Right"
         # Steer Right
         if steering != "R":
-            if steering == "L":
-                ser.write(b'r')
-                ser.write(b'r')
-                ser.write(b'r')
-                ser.write(b'r')
-            else:
-                ser.write(b'r')
-                ser.write(b'r')
+            # if steering == "L":
+            #     ser.write(b'r')
+            #     ser.write(b'r')
+            #     ser.write(b'r')
+            #     ser.write(b'r')
+            # else:
+            #     ser.write(b'r')
+            #     ser.write(b'r')
             
             steering = "R"
             print("\nTurning Right")
@@ -191,14 +191,14 @@ def carControl(pixDeviation):
         control = "Steer: Left"
         # Steer Left
         if steering != "L":
-            if steering == "R":
-                ser.write(b'l')
-                ser.write(b'l')
-                ser.write(b'l')
-                ser.write(b'l')
-            else:
-                ser.write(b'l')
-                ser.write(b'l')
+            # if steering == "R":
+            #     ser.write(b'l')
+            #     ser.write(b'l')
+            #     ser.write(b'l')
+            #     ser.write(b'l')
+            # else:
+            #     ser.write(b'l')
+            #     ser.write(b'l')
                 
             steering = "L"
             print("\nTurning Left")
@@ -206,14 +206,14 @@ def carControl(pixDeviation):
     else:
         control = "Steer: Straight"
         if steering != "C":
-            if steering == "L":
-                print("\nTurning Right to Center")
-                ser.write(b'r')
-                ser.write(b'r')
-            else:
-                print("\nTurning Left to Center")
-                ser.write(b'l')
-                ser.write(b'l')
+            # if steering == "L":
+            #     print("\nTurning Right to Center")
+            #     ser.write(b'r')
+            #     ser.write(b'r')
+            # else:
+            #     print("\nTurning Left to Center")
+            #     ser.write(b'l')
+            #     ser.write(b'l')
             
             steering = "C"
             print("Steering Position: " + steering)
@@ -223,46 +223,81 @@ def carControl(pixDeviation):
 def finalMask(img):
     image = img
     
-        # Lane Centering Guide Lines
-    # Left Blue
-    left1 = (515 - 240, 900)
-    left2 = (515 + 240, 900)
-    # Right Blue
-    right1 = (1365 - 240, 900)
-    right2 = (1365 + 240, 900)
-    # Red Box
-    boxLeft1 = ((515 - 240) - 100, 900 - 100)
-    boxLeft2 = ((515 - 240) - 100, 900 + 100)
-    boxRight1 = ((1365 + 240) + 100, 900 - 100)
-    boxRight2 = ((1365 + 240) + 100, 900 + 100)
+    height = image.shape[0]
+    width = image.shape[1]
+
+    if height == 1080 and width == 1620:
+        # Line Values
+        y = 900
+        leftMidX = 380
+        rightMidX = 1300
+        midX = 840
+        line_x_offset = 200
+        # Text Values
+        leftText_X = 100
+        rightText_X = 1100
+        text_Y = 200
+        # Colors
+        white = (255, 255, 255)
+        red = (255, 0 , 0)
+        green = (0, 255, 0)
+        blue = (0, 0, 255)
+    elif height == 1080 and width == 1920:
+        # Line Values
+        y = 900
+        leftMidX = 515
+        rightMidX = 1365
+        midX = 905
+        line_x_offset = 240
+        # Text Values
+        leftText_X = 100
+        rightText_X = 1400
+        text_Y = 200
+        # Colors
+        white = (255, 255, 255)
+        red = (255, 0 , 0)
+        green = (0, 255, 0)
+        blue = (0, 0, 255)
+
+    # Left
+    left1 = (leftMidX - line_x_offset, y)
+    left2 = (leftMidX + line_x_offset, y)
+    # Right
+    right1 = (rightMidX - line_x_offset, y)
+    right2 = (rightMidX + line_x_offset, y)
+    # Box
+    boxLeft1 = ((leftMidX - line_x_offset) - 100, y - 100)
+    boxLeft2 = ((leftMidX - line_x_offset) - 100, y + 100)
+    boxRight1 = ((rightMidX + line_x_offset) + 100, y - 100)
+    boxRight2 = ((rightMidX + line_x_offset) + 100, y + 100)
     # White Midline
-    mid = ((905, 900 - 50), (905, 900 + 50))
+    mid = ((midX, y - 50), (midX, y + 50))
     # Blue Midlines
-    midpoint_markerR = ((1365, 900 - 50), (1365, 900 + 50))
-    midpoint_markerL = ((515, 900 - 50), (515, 900 + 50))
+    midpoint_markerR = ((rightMidX, y - 50), (rightMidX, y + 50))
+    midpoint_markerL = ((leftMidX, y - 50), (leftMidX, y + 50))
     
     try:
-        laneMarkerL = ((x1, 900 - 30), (x1, 900 + 30))
-        laneMarkerR = ((x2, 900 - 30), (x2, 900 + 30))
+        laneMarkerL = ((x1, y - 30), (x1, y + 30))
+        laneMarkerR = ((x2, y - 30), (x2, y + 30))
     
         # Draw the red line
-        cv2.line(image, left1, left2, (0, 0, 255), 3)
-        cv2.line(image, right1, right2, (0, 0, 255), 3)
+        cv2.line(image, left1, left2, blue, 3)
+        cv2.line(image, right1, right2, blue, 3)
 
             # Draw the shorter line for the midpoint marker
-        cv2.line(image, midpoint_markerL[0], midpoint_markerL[1], (0, 0, 255), 3)
-        cv2.line(image, midpoint_markerR[0], midpoint_markerR[1], (0, 0, 255), 3)
-        cv2.line(image, mid[0], mid[1], (255, 255, 255), 2)
+        cv2.line(image, midpoint_markerL[0], midpoint_markerL[1], blue, 3)
+        cv2.line(image, midpoint_markerR[0], midpoint_markerR[1], blue, 3)
+        cv2.line(image, mid[0], mid[1], white, 2)
         
         try:
-            cv2.line(image, laneMarkerL[0], laneMarkerL[1], (0, 255, 0), 3)
-            cv2.line(image, laneMarkerR[0], laneMarkerR[1], (0, 255, 0), 3)
+            cv2.line(image, laneMarkerL[0], laneMarkerL[1], green, 3)
+            cv2.line(image, laneMarkerR[0], laneMarkerR[1], green, 3)
         
             # Box
-            cv2.line(image, boxLeft1, boxLeft2, (255, 0, 0), 3)
-            cv2.line(image, boxRight1, boxRight2, (255, 0, 0), 3)
-            cv2.line(image, boxLeft1, boxRight1, (255, 0, 0), 3)
-            cv2.line(image, boxLeft2, boxRight2, (255, 0, 0), 3)
+            cv2.line(image, boxLeft1, boxLeft2, red, 3)
+            cv2.line(image, boxRight1, boxRight2, red, 3)
+            cv2.line(image, boxLeft1, boxRight1, red, 3)
+            cv2.line(image, boxLeft2, boxRight2, red, 3)
 
             try:
                 # Add the text to the image
@@ -270,12 +305,12 @@ def finalMask(img):
                 midR = "Right Midpoint = 1365"
 
                 leftX = f"Left X = {x2:.2f}"
-                left = int(x1 - 515)
+                left = int(x1 - leftMidX)
                 lDev = f"Left Deviation = {left:.2f}"
                 
                 
                 rightX = f"Right X = {x1:.2f}"
-                right = int(x2 - 1365)
+                right = int(x2 - rightMidX)
                 rDev = f"Right Deviation = {right:.2f}"
 
                 average = (left + right) / 2
@@ -286,27 +321,26 @@ def finalMask(img):
 
                     # Draw Steering Line
                 average = int(average)
-                mid = ((905 + average, 900 - 30), (905 + average, 900 + 30))
-                cv2.line(img, (905 + average, 900), (905, 900), (0, 255, 0), 2)
-                cv2.line(img, mid[0], mid[1], (0, 255, 0), 2)
+                mid = ((midX + average, y - 30), (midX + average, y + 30))
+                cv2.line(img, (midX + average, y), (midX, y), green, 2)
+                cv2.line(img, mid[0], mid[1], green, 2)
 
                     # Define the font and other text properties
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 font_scale = 1
-                font_color = (255, 255, 255)  # White color
                 font_thickness = 2
 
-                cv2.putText(img, midL, (100, 200), font, font_scale, (0, 0, 255), font_thickness)
-                cv2.putText(img, midR, (1400, 200), font, font_scale, (0, 0, 255), font_thickness)
+                cv2.putText(img, midL, (leftText_X , text_Y), font, font_scale, blue, font_thickness)
+                cv2.putText(img, midR, (rightText_X, text_Y), font, font_scale, blue, font_thickness)
 
-                cv2.putText(img, leftX, (100, 250), font, font_scale, (0, 255, 0), font_thickness)
-                cv2.putText(img, rightX, (1400, 250), font, font_scale, (0, 255, 0), font_thickness)
+                cv2.putText(img, leftX, (leftText_X , text_Y + 50), font, font_scale, green, font_thickness)
+                cv2.putText(img, rightX, (rightText_X, text_Y + 50), font, font_scale, green, font_thickness)
 
-                cv2.putText(img, lDev, (100, 300), font, font_scale, (0, 0, 255), font_thickness)
-                cv2.putText(img, rDev, (1400, 300), font, font_scale, (0, 0, 255), font_thickness)
+                cv2.putText(img, lDev, (leftText_X , text_Y + 100), font, font_scale, blue, font_thickness)
+                cv2.putText(img, rDev, (rightText_X, text_Y + 100), font, font_scale, blue, font_thickness)
 
-                cv2.putText(img, avgDev, (750, 600), font, font_scale, font_color, font_thickness)
-                cv2.putText(img, steeringInput, (750, 650), font, font_scale, font_color, font_thickness)
+                cv2.putText(img, avgDev, ((midX - 150), y - 300), font, font_scale, white, font_thickness)
+                cv2.putText(img, steeringInput, ((midX -150), y - 350), font, font_scale, white, font_thickness)
             except Exception as ex:
                 print("\nfinalMask() Exception 3:\n\t", ex)
                 pass
@@ -336,7 +370,13 @@ def process_image(image):
     # yMax = image.shape[0]
     # yLen = 500    
 
-    vertices = np.array([[(300, 1000), (1600, 1000), (1480, 700), (515, 700)]], dtype=np.int32)
+    height = image.shape[0]
+    width = image.shape[1]
+
+    if height == 1080 and width == 1620:
+        vertices = np.array([[(180, 1000), (1500, 1000), (1500, 800), (180, 800)]], dtype=np.int32)
+    elif height == 1080 and width == 1920:
+        vertices = np.array([[(300, 1000), (1600, 1000), (1480, 700), (515, 700)]], dtype=np.int32)
 
     masked_image = region_of_interest(cannyEdge_image, vertices)
 
@@ -361,8 +401,8 @@ def process_image(image):
 
     return complete_img
 
-cap = cv2.VideoCapture(0)
-ser.write(b'f')
+cap = cv2.VideoCapture("test.mp4")
+# ser.write(b'f')
 
 # '''
 while (cap.isOpened()):
@@ -380,18 +420,18 @@ while (cap.isOpened()):
         
     cv2.imshow('result', frameRS)
     if cv2.waitKey(10) & 0xFF == ord('q'):
-           ser.write(b's')
-           ser.close()
+        #    ser.write(b's')
+        #    ser.close()
            break
 
-if steering == "L":
-    ser.write(b'r')
-    ser.write(b'r')
-elif steering == "R":
-    ser.write(b'l')
-    ser.write(b'l')
+# if steering == "L":
+#     ser.write(b'r')
+#     ser.write(b'r')
+# elif steering == "R":
+#     ser.write(b'l')
+#     ser.write(b'l')
 
-ser.write(b'c')
+# ser.write(b'c')
 
 cap.release()
 cv2.destroyAllWindows()
