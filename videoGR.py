@@ -10,7 +10,7 @@ import time
 #MAC: /dev/cu.usbserial-10
 #LINUX: /dev/ttyACM2
 try:
-    arduino_port = '/dev/cu.usbserial-110' 
+    arduino_port = '/dev/cu.usbserial-1130' 
     baud_rate = 9600
 
     ser = serial.Serial(arduino_port, baud_rate, timeout=1)
@@ -105,7 +105,7 @@ def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
                 if min_slope <= abs(lSlope) <= max_slope:
                     intercept = y1 - lSlope * x1
 
-                    if (line_midpoint_x < img_center - 100):
+                    if (line_midpoint_x < img_center):
                         leftLaneSlopeArray += [slope]
                         leftLaneInterceptArray += [intercept]
                     else:
@@ -174,14 +174,14 @@ def carControl(pixDeviation):
         control = "Steer: Right"
         # Steer Right
         if steering != "R":
-            # if steering == "L":
-            #     ser.write(b'r')
-            #     ser.write(b'r')
-            #     ser.write(b'r')
-            #     ser.write(b'r')
-            # else:
-            #     ser.write(b'r')
-            #     ser.write(b'r')
+            if steering == "L":
+                ser.write(b'r')
+                ser.write(b'r')
+                ser.write(b'r')
+                ser.write(b'r')
+            else:
+                ser.write(b'r')
+                ser.write(b'r')
             
             steering = "R"
             print("\nTurning Right")
@@ -191,14 +191,14 @@ def carControl(pixDeviation):
         control = "Steer: Left"
         # Steer Left
         if steering != "L":
-            # if steering == "R":
-            #     ser.write(b'l')
-            #     ser.write(b'l')
-            #     ser.write(b'l')
-            #     ser.write(b'l')
-            # else:
-            #     ser.write(b'l')
-            #     ser.write(b'l')
+            if steering == "R":
+                ser.write(b'l')
+                ser.write(b'l')
+                ser.write(b'l')
+                ser.write(b'l')
+            else:
+                ser.write(b'l')
+                ser.write(b'l')
                 
             steering = "L"
             print("\nTurning Left")
@@ -206,14 +206,14 @@ def carControl(pixDeviation):
     else:
         control = "Steer: Straight"
         if steering != "C":
-            # if steering == "L":
-            #     print("\nTurning Right to Center")
-            #     ser.write(b'r')
-            #     ser.write(b'r')
-            # else:
-            #     print("\nTurning Left to Center")
-            #     ser.write(b'l')
-            #     ser.write(b'l')
+            if steering == "L":
+                print("\nTurning Right to Center")
+                ser.write(b'r')
+                ser.write(b'r')
+            else:
+                print("\nTurning Left to Center")
+                ser.write(b'l')
+                ser.write(b'l')
             
             steering = "C"
             print("Steering Position: " + steering)
@@ -376,7 +376,7 @@ def process_image(image):
     if height == 1080 and width == 1620:
         vertices = np.array([[(180, 1000), (1500, 1000), (1500, 800), (180, 800)]], dtype=np.int32)
     elif height == 1080 and width == 1920:
-        vertices = np.array([[(300, 1000), (1600, 1000), (1480, 700), (515, 700)]], dtype=np.int32)
+        vertices = np.array([[(275, 1000), (1605, 1000), (1605, 700), (275, 700)]], dtype=np.int32)
 
     masked_image = region_of_interest(cannyEdge_image, vertices)
 
@@ -401,8 +401,22 @@ def process_image(image):
 
     return complete_img
 
-cap = cv2.VideoCapture("test.mp4")
-# ser.write(b'f')
+cap = cv2.VideoCapture(0)
+
+count = 1
+filename = f"output_{count}.mp4"
+output_folder = 'outputs'
+output_path = os.path.join(output_folder, filename)
+
+while os.path.exists(output_path):
+    count += 1
+    filename = f'output_{count}.mp4'
+    output_path = os.path.join(output_folder, filename)
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+out = cv2.VideoWriter(filename, fourcc, 20.0, (1920, 1080))
+
+ser.write(b'f')
 
 # '''
 while (cap.isOpened()):
@@ -418,21 +432,24 @@ while (cap.isOpened()):
     except:
         frameRs = final_image
         
+    out.write(final_image)
+    
     cv2.imshow('result', frameRS)
-    if cv2.waitKey(10) & 0xFF == ord('q'):
-        #    ser.write(b's')
-        #    ser.close()
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+           ser.write(b's')
            break
 
-# if steering == "L":
-#     ser.write(b'r')
-#     ser.write(b'r')
-# elif steering == "R":
-#     ser.write(b'l')
-#     ser.write(b'l')
+if steering == "L":
+    ser.write(b'r')
+    ser.write(b'r')
+elif steering == "R":
+    ser.write(b'l')
+    ser.write(b'l')
 
-# ser.write(b'c')
+ser.write(b'c')
+ser.close()
 
+out.release()
 cap.release()
 cv2.destroyAllWindows()
 #'''
